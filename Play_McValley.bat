@@ -3,6 +3,20 @@ title McValley Launcher
 chcp 65001 >nul 2>&1
 color 0A
 
+:: สร้าง Shortcut บน Desktop อัตโนมัติถ้ายังไม่มี
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"$shortcutPath = [System.IO.Path]::Combine([Environment]::GetFolderPath('Desktop'), 'เล่น McValley - กดตัวนี้เพื่ออัปเดตและเล่นเกม.lnk'); ^
+if (!(Test-Path $shortcutPath)) { ^
+  $WshShell = New-Object -ComObject WScript.Shell; ^
+  $sc = $WshShell.CreateShortcut($shortcutPath); ^
+  $sc.TargetPath = '%~f0'; ^
+  $sc.WorkingDirectory = '%~dp0'; ^
+  $sc.IconLocation = '%~dp0playstardew.exe,0'; ^
+  $sc.Description = 'คลิกตัวนี้เพื่ออัปเดตและเล่น McValley - Stardew Valley Modpack'; ^
+  $sc.Save(); ^
+  Write-Host ' [✓] สร้าง Shortcut บน Desktop แล้ว!' -ForegroundColor Magenta ^
+}"
+
 echo.
 echo  ╔════════════════════════════════════════════════════╗
 echo  ║         McValley - Stardew Valley Modpack          ║
