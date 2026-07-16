@@ -32,9 +32,23 @@ try { ^
         $compare = Invoke-RestMethod -Uri $compare_url -Headers $headers -TimeoutSec 15; ^
         $changed_files = $compare.files | Where-Object { $_.status -ne 'removed' } | Select-Object -ExpandProperty filename; ^
         Write-Host \" [*] ไฟล์ที่เปลี่ยน: $($changed_files.Count) ไฟล์\" -ForegroundColor Yellow; ^
+        $bat_changed = $compare.files | Where-Object { $_.filename -eq 'Play_McValley.bat' }; ^
+        if ($bat_changed) { ^
+          Write-Host ' [*] พบอัปเดต launcher กำลังอัปเดตตัวเอง...' -ForegroundColor Magenta; ^
+          $bat_url = \"https://raw.githubusercontent.com/$owner/$repo/main/Play_McValley.bat\"; ^
+          Invoke-WebRequest -Uri $bat_url -OutFile 'Play_McValley_new.bat' -TimeoutSec 30; ^
+          $remote_commit | Out-File 'version.txt' -Encoding ascii -NoNewline; ^
+          Write-Host ' [✓] Launcher อัปเดตแล้ว กำลังรีสตาร์ท...' -ForegroundColor Green; ^
+          Start-Process 'Play_McValley_new.bat'; ^
+          Start-Sleep -Milliseconds 500; ^
+          Remove-Item 'Play_McValley.bat' -Force; ^
+          Rename-Item 'Play_McValley_new.bat' 'Play_McValley.bat'; ^
+          exit ^
+        } ^
       } catch { ^
         Write-Host ' [!] เปรียบไม่ได้ ดาวน์โหลดทั้งหมดแทน...' -ForegroundColor Red; ^
         $changed_files = $null; ^
+        $compare = $null ^
       } ^
     }; ^
     $base_url = \"https://raw.githubusercontent.com/$owner/$repo/main\"; ^
@@ -51,7 +65,7 @@ try { ^
           if (Test-Path $folder) { Remove-Item $folder -Recurse -Force }; ^
           New-Item -ItemType Directory -Path $folder -Force | Out-Null; ^
           Copy-Item \"$src\\$folder\\*\" -Destination $folder -Recurse -Force; ^
-          Write-Host \" [✓] ซิงค์ $folder/\" -ForegroundColor Green; ^
+          Write-Host \" [✓] ซิงค์ $folder/\" -ForegroundColor Green ^
         } ^
       }; ^
       if (Test-Path \"$src\\playstardew.exe\") { Copy-Item \"$src\\playstardew.exe\" -Destination 'playstardew.exe' -Force; Write-Host ' [✓] ซิงค์ playstardew.exe' -ForegroundColor Green }; ^
@@ -67,21 +81,23 @@ try { ^
           if ($dest_dir -ne '' -and !(Test-Path $dest_dir)) { New-Item -ItemType Directory -Path $dest_dir -Force | Out-Null }; ^
           $download_url = \"$base_url/$($file -replace ' ', '%20')\"; ^
           try { ^
-            Invoke-WebRequest -Uri $download_url -OutFile $dest_path -TimeoutSec 30; ^
+            Invoke-WebRequest -Uri $download_url -OutFile $dest_path -TimeoutSec 60; ^
             Write-Host \" [↓] $file\" -ForegroundColor Cyan; ^
             $downloaded++ ^
           } catch { Write-Host \" [!] ดาวน์โหลดไม่ได้: $file\" -ForegroundColor Red } ^
         } else { $skipped++ } ^
       }; ^
-      $removed = $compare.files | Where-Object { $_.status -eq 'removed' } | Select-Object -ExpandProperty filename; ^
-      foreach ($file in $removed) { ^
-        $dest_path = $file.Replace('/', '\\'); ^
-        if (Test-Path $dest_path) { Remove-Item $dest_path -Force; Write-Host \" [x] ลบ: $file\" -ForegroundColor DarkGray } ^
+      if ($compare) { ^
+        $removed = $compare.files | Where-Object { $_.status -eq 'removed' } | Select-Object -ExpandProperty filename; ^
+        foreach ($file in $removed) { ^
+          $dest_path = $file.Replace('/', '\\'); ^
+          if (Test-Path $dest_path) { Remove-Item $dest_path -Force; Write-Host \" [x] ลบ: $file\" -ForegroundColor DarkGray } ^
+        } ^
       }; ^
-      Write-Host \" [✓] อัปเดต $downloaded ไฟล์ (ข้าม $skipped ไฟล์ที่ไม่เกี่ยว)\" -ForegroundColor Green; ^
+      Write-Host \" [✓] อัปเดต $downloaded ไฟล์ (ข้าม $skipped ไฟล์ที่ไม่เกี่ยว)\" -ForegroundColor Green ^
     }; ^
     $remote_commit | Out-File 'version.txt' -Encoding ascii -NoNewline; ^
-    Write-Host ' [✓] อัปเดตเสร็จแล้ว!' -ForegroundColor Green; ^
+    Write-Host ' [✓] อัปเดตเสร็จแล้ว!' -ForegroundColor Green ^
   } ^
 } catch { ^
   Write-Host \" [!] เชื่อมต่อ GitHub ไม่ได้: $_\" -ForegroundColor Red; ^
