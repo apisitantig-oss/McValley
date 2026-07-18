@@ -28,16 +28,14 @@ public class lockmod extends Gui {
         }
         ScaledResolution scaledresolution = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
         String serverIP = "";
-        if (!mc.isSingleplayer()) {
-            if (mc.func_147104_D() != null && mc.func_147104_D().serverIP != null) {
-                serverIP = mc.func_147104_D().serverIP.toLowerCase();
-                if (!serverIP.trim().equalsIgnoreCase("hitza13.thddns.net:5570")) {
-                    mc.getTextureManager().bindTexture(closegui);
-                    this.drawTexturedModalRect(0, 0, 0, 0, 1000, 1000);
-                    if (mc.thePlayer != null && mc.thePlayer.ticksExisted % 300 == 1) {
-                        mc.shutdown();
-                    }
-                }
+        if (!mc.isSingleplayer() && mc.func_147104_D() != null && mc.func_147104_D().serverIP != null) {
+            serverIP = mc.func_147104_D().serverIP.toLowerCase();
+        }
+        if (!serverIP.trim().equalsIgnoreCase("hitza13.thddns.net:5570")) {
+            mc.getTextureManager().bindTexture(closegui);
+            this.drawTexturedModalRect(0, 0, 0, 0, 1000, 1000);
+            if (mc.thePlayer != null && mc.thePlayer.ticksExisted % 300 == 1) {
+                mc.shutdown();
             }
         }
     }
